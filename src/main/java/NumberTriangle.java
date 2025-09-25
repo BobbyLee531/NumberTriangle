@@ -108,8 +108,22 @@ public class NumberTriangle {
      *
      */
     public int retrieve(String path) {
+        if (path.isEmpty()) {
+            return this.root;
+        }
 
-        return -1;
+        char direction = path.charAt(0);
+        String rest = path.substring(1);
+
+        if (direction == 'l') {
+            return left.retrieve(rest);
+        } else if (direction == 'r') {
+            return right.retrieve(rest);
+        } else {
+            throw new IllegalArgumentException("Invalid path character: " + direction);
+        }
+
+
     }
 
 
