@@ -1,4 +1,6 @@
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This is the provided NumberTriangle class to be used in this coding task.
@@ -63,7 +65,25 @@ public class NumberTriangle {
      * Note: a NumberTriangle contains at least one value.
      */
     public void maxSumPath() {
-        // for fun [not for credit]:
+        if (isLeaf()) {
+            return;
+        }
+
+        if (left != null) {
+            left.maxSumPath();
+        }
+
+        if (right != null) {
+            right.maxSumPath();
+        }
+
+        int leftVal = (left != null) ? left.getRoot() : 0;
+        int rightVal = (right != null) ? right.getRoot() : 0;
+
+        root = root + Math.max(leftVal, rightVal);
+
+        left = null;
+        right = null;
     }
 
 
@@ -88,9 +108,10 @@ public class NumberTriangle {
      *
      */
     public int retrieve(String path) {
-        // TODO implement this method
+
         return -1;
     }
+
 
     /** Read in the NumberTriangle structure from a file.
      *
@@ -104,32 +125,46 @@ public class NumberTriangle {
      * @throws IOException may naturally occur if an issue reading the file occurs
      */
     public static NumberTriangle loadTriangle(String fname) throws IOException {
-        // open the file and get a BufferedReader object whose methods
-        // are more convenient to work with when reading the file contents.
         InputStream inputStream = NumberTriangle.class.getClassLoader().getResourceAsStream(fname);
-        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-
-
-        // TODO define any variables that you want to use to store things
-
-        // will need to return the top of the NumberTriangle,
-        // so might want a variable for that.
-        NumberTriangle top = null;
-
-        String line = br.readLine();
-        while (line != null) {
-
-            // remove when done; this line is included so running starter code prints the contents of the file
-            System.out.println(line);
-
-            // TODO process the line
-
-            //read the next line
-            line = br.readLine();
+        if (inputStream == null) {
+            throw new IOException("File not found: " + fname);
         }
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
+
+        NumberTriangle top = null;
+        List<NumberTriangle> previousRow = new ArrayList<>();
+
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+
+            String[] parts = line.split("\\s+");
+            List<NumberTriangle> currentRow = new ArrayList<>();
+
+            for (String part : parts) {
+                int val = Integer.parseInt(part);
+                currentRow.add(new NumberTriangle(val));
+            }
+
+            if (!previousRow.isEmpty()) {
+                for (int i = 0; i < previousRow.size(); i++) {
+                    previousRow.get(i).setLeft(currentRow.get(i));
+                    previousRow.get(i).setRight(currentRow.get(i + 1));
+                }
+            } else {
+                top = currentRow.get(0);
+            }
+
+            // Update for next iteration
+            previousRow = currentRow;
+        }
+
         br.close();
         return top;
     }
+
 
     public static void main(String[] args) throws IOException {
 
